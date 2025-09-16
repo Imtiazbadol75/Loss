@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রোডাকশন লস ক্যালকুলেটর</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #263238, #37474f); /* গাঢ় ধূসর-নীল গ্রেডিয়েন্ট */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            animation: backgroundGlow 10s infinite alternate;
+        }
+
+        @keyframes backgroundGlow {
+            0% { background: linear-gradient(135deg, #263238, #37474f); }
+            100% { background: linear-gradient(135deg, #37474f, #263238); }
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff5722; /* উজ্জ্বল কমলা */
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: #263238;
+            font-size: 1em; /* লেবেল ফন্ট সাইজ ছোট করা */
+        }
+
+        label i {
+            margin-right: 8px; /* আইকনের স্পেস কমানো */
+            color: #ff5722;
+            font-size: 20px; /* আইকন সাইজ সামান্য ছোট */
+            transition: transform 0.3s ease;
+        }
+
+        label i:hover {
+            transform: scale(1.2);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fffde7;
+            font-size: 1em;
+            color: #333;
+            transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+
+        input:focus, select:focus {
+            border-color: #ff5722;
+            box-shadow: 0 0 12px rgba(255, 87, 34, 0.4);
+            background: #fff;
+            outline: none;
+        }
+
+        .row-inputs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .row-inputs > div {
+            flex: 1;
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: center; /* কেন্দ্রে রাখা */
+            gap: 15px; /* লেবেলের মধ্যে গ্যাপ কমানো */
+            margin-bottom: 8px; /* মার্জিন কমানো */
+        }
+
+        .time-labels label {
+            flex: 0 1 auto; /* লেবেলের প্রস্থ স্বয়ংক্রিয়ভাবে সামঞ্জস্য */
+            white-space: nowrap; /* লেবেল এক লাইনে থাকবে */
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #ff5722, #ef6c00);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(255, 87, 34, 0.4);
+        }
+
+        #result-box {
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 10px;
+            background: #fff3e0;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #263238;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        #result-box.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #time-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+
+        #error-message {
+            color: #d32f2f;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 1em;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>প্রোডাকশন লস ক্যালকুলেটর</h1>
+
+        <div class="input-group">
+            <label for="defaultProductionSpeed"><i class="fas fa-tachometer-alt"></i> ডিফল্ট প্রোডাকশন স্পিড (কেজি/ঘন্টা)</label>
+            <input type="number" id="defaultProductionSpeed" value="0">
+        </div>
+
+        <div class="input-group">
+            <label for="machineCount"><i class="fas fa-cogs"></i> মেশিনের সংখ্যা</label>
+            <select id="machineCount">
+                <script>
+                    for (let i = 1; i <= 18; i++) {
+                        document.write(`<option value="${i}">${i}</option>`);
+                    }
+                </script>
+            </select>
+        </div>
+
+        <div id="dynamicInputsContainer">
+            <!-- Dynamic inputs will be generated here -->
+        </div>
+        
+        <div class="input-group">
+            <div class="time-labels">
+                <label for="stopTime"><i class="fas fa-stopwatch"></i> বন্ধ হওয়ার সময়</label>
+                <label for="startTime"><i class="fas fa-clock"></i> চালু হওয়ার সময়</label>
+            </div>
+            <div class="row-inputs">
+                <div>
+                    <input type="time" id="stopTime">
+                </div>
+                <div>
+                    <input type="time" id="startTime">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="averagePercentage"><i class="fas fa-percentage"></i> গড় প্রোডাকশন ক্ষমতা (%)</label>
+            <select id="averagePercentage">
+                <option value="97">97%</option>
+                <option value="98">98%</option>
+                <option value="99">99%</option>
+                <option value="100" selected>100%</option>
+            </select>
+        </div>
+
+        <p id="error-message"></p>
+
+        <button onclick="calculateLoss()">লস হিসাব করুন</button>
+
+        <div id="result-box" style="display: none;">
+            <div id="time-row">
+                <p>বন্ধ হওয়ার সময়: <span id="stopTimeValue">--:--</span></p>
+                <p>চালু হওয়ার সময়: <span id="startTimeValue">--:--</span></p>
+            </div>
+            <p>সময়কাল: <span id="durationValue">0 ঘন্টা 0 মিনিট</span></p>
+            <p>মোট প্রোডাকশন লস: <span id="lossValue">0</span> কেজি</p>
+        </div>
+    </div>
+
+    <script>
+        const machineCountSelect = document.getElementById('machineCount');
+        const dynamicInputsContainer = document.getElementById('dynamicInputsContainer');
+        const defaultProductionSpeedInput = document.getElementById('defaultProductionSpeed');
+        const resultBox = document.getElementById('result-box');
+        const errorMessage = document.getElementById('error-message');
+
+        function generateSpeedInputs() {
+            const count = parseInt(machineCountSelect.value);
+            const defaultSpeed = parseFloat(defaultProductionSpeedInput.value);
+
+            dynamicInputsContainer.innerHTML = '';
+            if (count > 1) {
+                dynamicInputsContainer.style.display = 'block';
+                for (let i = 1; i <= count; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'input-group';
+                    div.innerHTML = `
+                        <label for="machineSpeed${i}"><i class="fas fa-robot"></i> মেশিন ${i} এর স্পিড (কেজি)</label>
+                        <input type="number" id="machineSpeed${i}" value="${defaultSpeed > 0 ? defaultSpeed : ''}" placeholder="যেমন: 5">
+                    `;
+                    dynamicInputsContainer.appendChild(div);
+                }
+            } else {
+                dynamicInputsContainer.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateSpeedInputs();
+        });
+
+        machineCountSelect.addEventListener('change', generateSpeedInputs);
+        defaultProductionSpeedInput.addEventListener('input', generateSpeedInputs);
+
+        function calculateLoss() {
+            const machineCount = parseInt(machineCountSelect.value);
+            const stopTime = document.getElementById('stopTime').value;
+            const startTime = document.getElementById('startTime').value;
+            const averagePercentage = parseInt(document.getElementById('averagePercentage').value);
+
+            resultBox.style.display = 'none';
+            resultBox.classList.remove('show');
+            errorMessage.innerText = '';
+
+            if (!stopTime || !startTime || isNaN(machineCount) || machineCount <= 0) {
+                errorMessage.innerText = "অনুগ্রহ করে সকল সঠিক তথ্য ইনপুট করুন।";
+                return;
+            }
+
+            let totalSpeed = 0;
+            if (machineCount === 1) {
+                const defaultSpeed = parseFloat(defaultProductionSpeedInput.value);
+                if (isNaN(defaultSpeed) || defaultSpeed <= 0) {
+                    errorMessage.innerText = "অনুগ্রহ করে ডিফল্ট প্রোডাকশন স্পিড সঠিকভাবে ইনপুট দিন।";
+                    return;
+                }
+                totalSpeed = defaultSpeed;
+            } else {
+                for (let i = 1; i <= machineCount; i++) {
+                    const speedInput = document.getElementById(`machineSpeed${i}`);
+                    if (!speedInput || isNaN(parseFloat(speedInput.value)) || parseFloat(speedInput.value) <= 0) {
+                        errorMessage.innerText = `মেশিন ${i} এর স্পিড সঠিকভাবে ইনপুট দিন।`;
+                        return;
+                    }
+                    totalSpeed += parseFloat(speedInput.value);
+                }
+            }
+            
+            totalSpeed = totalSpeed * (averagePercentage / 100);
+
+            const now = new Date();
+            const [stopHours, stopMinutes] = stopTime.split(':').map(Number);
+            const [startHours, startMinutes] = startTime.split(':').map(Number);
+
+            const stopDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), stopHours, stopMinutes);
+            const startDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHours, startMinutes);
+
+            if (startDateTime < stopDateTime) {
+                startDateTime.setDate(startDateTime.getDate() + 1);
+            }
+
+            const timeDifferenceMs = startDateTime - stopDateTime;
+            const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
+
+            if (timeDifferenceMinutes <= 0) {
+                errorMessage.innerText = "চালু হওয়ার সময় বন্ধ হওয়ার সময়ের পরে হতে হবে।";
+                return;
+            }
+
+            const hours = Math.floor(timeDifferenceMinutes / 60);
+            const minutes = Math.floor(timeDifferenceMinutes % 60);
+
+            const loss = (totalSpeed / 60) * timeDifferenceMinutes;
+            const roundedLoss = loss.toFixed(2);
+
+            // সময় ফরম্যাটিং
+            const formatTime = (hours, minutes) => {
+                const period = hours >= 12 ? 'PM' : 'AM';
+                const formattedHours = hours % 12 || 12;
+                return `${formattedHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+            };
+
+            document.getElementById('stopTimeValue').innerText = formatTime(stopHours, stopMinutes);
+            document.getElementById('startTimeValue').innerText = formatTime(startHours, startMinutes);
+            document.getElementById('durationValue').innerText = `${hours} ঘন্টা ${minutes} মিনিট`;
+            document.getElementById('lossValue').innerText = roundedLoss;
+            resultBox.style.display = 'block';
+            setTimeout(() => { resultBox.classList.add('show'); }, 10);
+        }
+    </script>
+</body>
+</html>
